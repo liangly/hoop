@@ -1,0 +1,14 @@
+com.cloudera.hoop
+com.cloudera.hoop.fs
+com.cloudera.lib.io
+com.cloudera.lib.json
+com.cloudera.lib.lang
+com.cloudera.lib.server
+com.cloudera.lib.service
+com.cloudera.lib.service.hadoop
+com.cloudera.lib.service.instrumentation
+com.cloudera.lib.service.scheduler
+com.cloudera.lib.service.security
+com.cloudera.lib.servlet
+com.cloudera.lib.util
+com.cloudera.lib.wsrs

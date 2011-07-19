@@ -1,0 +1,128 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * Copyright (c) 2011, Cloudera, Inc. All Rights Reserved.<a name="line.2"></a>
+<FONT color="green">003</FONT>     *<a name="line.3"></a>
+<FONT color="green">004</FONT>     * Cloudera, Inc. licenses this file to you under the Apache License,<a name="line.4"></a>
+<FONT color="green">005</FONT>     * Version 2.0 (the "License"). You may not use this file except in<a name="line.5"></a>
+<FONT color="green">006</FONT>     * compliance with the License. You may obtain a copy of the License at<a name="line.6"></a>
+<FONT color="green">007</FONT>     *<a name="line.7"></a>
+<FONT color="green">008</FONT>     *     http://www.apache.org/licenses/LICENSE-2.0<a name="line.8"></a>
+<FONT color="green">009</FONT>     *<a name="line.9"></a>
+<FONT color="green">010</FONT>     * This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR<a name="line.10"></a>
+<FONT color="green">011</FONT>     * CONDITIONS OF ANY KIND, either express or implied. See the License for<a name="line.11"></a>
+<FONT color="green">012</FONT>     * the specific language governing permissions and limitations under the<a name="line.12"></a>
+<FONT color="green">013</FONT>     * License.<a name="line.13"></a>
+<FONT color="green">014</FONT>     */<a name="line.14"></a>
+<FONT color="green">015</FONT>    package com.cloudera.hoop.fs;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>    import com.cloudera.hoop.HoopServer;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import com.cloudera.lib.io.IOUtils;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import com.cloudera.lib.service.Hadoop;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import org.apache.hadoop.fs.FileSystem;<a name="line.20"></a>
+<FONT color="green">021</FONT>    import org.apache.hadoop.fs.Path;<a name="line.21"></a>
+<FONT color="green">022</FONT>    import org.apache.hadoop.fs.permission.FsPermission;<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>    import java.io.IOException;<a name="line.24"></a>
+<FONT color="green">025</FONT>    import java.io.InputStream;<a name="line.25"></a>
+<FONT color="green">026</FONT>    import java.io.OutputStream;<a name="line.26"></a>
+<FONT color="green">027</FONT>    import java.net.URI;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>    public class FSCreate implements Hadoop.FileSystemExecutor&lt;URI&gt; {<a name="line.29"></a>
+<FONT color="green">030</FONT>      private InputStream is;<a name="line.30"></a>
+<FONT color="green">031</FONT>      private Path path;<a name="line.31"></a>
+<FONT color="green">032</FONT>      private String permission;<a name="line.32"></a>
+<FONT color="green">033</FONT>      private boolean override;<a name="line.33"></a>
+<FONT color="green">034</FONT>      private short replication;<a name="line.34"></a>
+<FONT color="green">035</FONT>      private long blockSize;<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>      public FSCreate(InputStream is, String path, String perm, boolean override, short repl, long blockSize) {<a name="line.37"></a>
+<FONT color="green">038</FONT>        this.is = is;<a name="line.38"></a>
+<FONT color="green">039</FONT>        this.path = new Path(path);<a name="line.39"></a>
+<FONT color="green">040</FONT>        this.permission = perm;<a name="line.40"></a>
+<FONT color="green">041</FONT>        this.override = override;<a name="line.41"></a>
+<FONT color="green">042</FONT>        this.replication = repl;<a name="line.42"></a>
+<FONT color="green">043</FONT>        this.blockSize = blockSize;<a name="line.43"></a>
+<FONT color="green">044</FONT>      }<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>      @Override<a name="line.46"></a>
+<FONT color="green">047</FONT>      public URI execute(FileSystem fs) throws IOException {<a name="line.47"></a>
+<FONT color="green">048</FONT>        if (replication == -1) {<a name="line.48"></a>
+<FONT color="green">049</FONT>          replication = (short) fs.getConf().getInt("dfs.replication", 3);<a name="line.49"></a>
+<FONT color="green">050</FONT>        }<a name="line.50"></a>
+<FONT color="green">051</FONT>        if (blockSize == -1) {<a name="line.51"></a>
+<FONT color="green">052</FONT>          blockSize = fs.getConf().getInt("dfs.block.size", 67108864);<a name="line.52"></a>
+<FONT color="green">053</FONT>        }<a name="line.53"></a>
+<FONT color="green">054</FONT>        FsPermission fsPermission = FSUtils.getPermission(permission);<a name="line.54"></a>
+<FONT color="green">055</FONT>        int bufferSize = fs.getConf().getInt("hoop.buffer.size", 4096);<a name="line.55"></a>
+<FONT color="green">056</FONT>        OutputStream os = fs.create(path, fsPermission, override, bufferSize, replication, blockSize, null);<a name="line.56"></a>
+<FONT color="green">057</FONT>        IOUtils.copy(is, os);<a name="line.57"></a>
+<FONT color="green">058</FONT>        os.close();<a name="line.58"></a>
+<FONT color="green">059</FONT>        return FSUtils.convertPathToHoop(path, HoopServer.get().getBaseUrl()).toUri();<a name="line.59"></a>
+<FONT color="green">060</FONT>      }<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>    }<a name="line.62"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

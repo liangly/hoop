@@ -1,0 +1,36 @@
+-classpath
+'/Users/tucu/src/github/cloudera-hoop/hoop-client/target/classes:/Users/tucu/.m2/repository/hsqldb/hsqldb/1.8.0.7/hsqldb-1.8.0.7.jar:/Users/tucu/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar:/Users/tucu/.m2/repository/commons-el/commons-el/1.0/commons-el-1.0.jar:/Users/tucu/.m2/repository/commons-net/commons-net/1.4.1/commons-net-1.4.1.jar:/Users/tucu/.m2/repository/javax/servlet/jsp/jsp-api/2.0/jsp-api-2.0.jar:/Users/tucu/.m2/repository/org/mortbay/jetty/jetty-util/6.1.14/jetty-util-6.1.14.jar:/Users/tucu/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/tucu/.m2/repository/tomcat/jasper-compiler/5.5.23/jasper-compiler-5.5.23.jar:/Users/tucu/.m2/repository/org/slf4j/slf4j-api/1.4.3/slf4j-api-1.4.3.jar:/Users/tucu/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar:/Users/tucu/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.5.2/jackson-core-asl-1.5.2.jar:/Users/tucu/.m2/repository/org/mortbay/jetty/jetty/6.1.14/jetty-6.1.14.jar:/Users/tucu/.m2/repository/com/cloudera/alfredo/alfredo/0.1.5/alfredo-0.1.5.jar:/Users/tucu/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.5.2/jackson-mapper-asl-1.5.2.jar:/Users/tucu/.m2/repository/tomcat/jasper-runtime/5.5.23/jasper-runtime-5.5.23.jar:/Users/tucu/.m2/repository/net/java/dev/jets3t/jets3t/0.6.1/jets3t-0.6.1.jar:/Users/tucu/.m2/repository/ant/ant/1.6.5/ant-1.6.5.jar:/Users/tucu/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/Users/tucu/.m2/repository/org/apache/hadoop/hadoop-core/0.20.2-cdh3u0/hadoop-core-0.20.2-cdh3u0.jar:/Users/tucu/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/Users/tucu/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar:/Users/tucu/.m2/repository/org/eclipse/jdt/core/3.1.1/core-3.1.1.jar:/Users/tucu/.m2/repository/xmlenc/xmlenc/0.52/xmlenc-0.52.jar:/Users/tucu/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4.jar'
+-encoding
+'UTF-8'
+-protected
+-quiet
+-sourcepath
+'/Users/tucu/src/github/cloudera-hoop/hoop-client/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2011 <a href="http://www.cloudera.com">Cloudera</a>. All Rights Reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/tucu/src/github/cloudera-hoop/hoop-client/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Hoop Client 0.1.0-SNAPSHOT API'
+-group
+'Hoop Client API' 'com.cloudera.hoop.client.fs'
+-link
+'http://java.sun.com/javase/6/docs/api'
+-linkoffline
+'http://github.com/cloudera/hoop/hoop-testng/apidocs' '/Users/tucu/src/github/cloudera-hoop/hoop-testng/target/site/apidocs'
+-linkoffline
+'http://github.com/cloudera/hoop/hoop-server/apidocs' '/Users/tucu/src/github/cloudera-hoop/hoop-server/target/site/apidocs'
+-linkoffline
+'http://github.com/cloudera/hoop/hoop-docs/apidocs' '/Users/tucu/src/github/cloudera-hoop/hoop-docs/target/site/apidocs'
+-linkoffline
+'http://github.com/cloudera/hoop/hoop-distro/apidocs' '/Users/tucu/src/github/cloudera-hoop/hoop-distro/target/site/apidocs'
+-linksource
+-use
+-version
+-windowtitle
+'Hoop Client 0.1.0-SNAPSHOT API'
