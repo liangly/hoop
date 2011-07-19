@@ -1,0 +1,139 @@
+~~ Licensed to Cloudera, Inc. under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. Cloudera, Inc. licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+  ---
+  Hoop, Hadoop HDFS over HTTP ${project.version} - Server Setup
+  ---
+  Alejandro Abdelnur
+  ---
+  ${maven.build.timestamp}
+
+Hoop, Hadoop HDFS over HTTP ${project.version} - Server Setup
+
+  \[ {{{index.html}Go Back}} \]
+
+  This page explains how to quickly setup Hoop with Pseudo authentication
+  against a Hadoop cluster with Pseudo authentication.
+
+* Requirements
+
+    * Java 6+
+
+    * Maven 3+
+
+* Clone Hoop Git repository
+
++---+
+~ $ git clone git://github.com/cloudera/hoop.git
++---+
+
+* Build Hoop
+
++---+
+~ $ cd hoop
+hoop $ mvn clean package site assembly:single
++---+
+
+* Install Hoop
+
++---+
+~ $ tar xzf  hoop/hoop-distro/target/hoop-${project.version}.tar.gz
++---+
+
+* Configure Hoop
+
+  Edit the <<<hoop-${project.version}/conf/hoop-site.xml>>> file and
+  set the <<<hoop.hadoop.conf:fs.default.name>>> property to the HDFS
+  Namenode URI. For example:
+
++---+
+hoop.hadoop.conf:fs.default.name=hdfs://localhost:8021
++---+
+
+* Configure Hadoop
+
+  Edit Hadoop <<<core-site.xml>>> and defined the Unix user that will
+  run the Hoop server as a proxyuser. For example:
+
++---+
+  ...
+  <property>
+    <name>hadoop.proxyuser.#HOOPUSER#.hosts</name>
+    <value>myhoop.foo.com</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.#HOOPUSER#.groups</name>
+    <value>*</value>
+  </property>
+  ...
++---+
+
+  IMPORTANT: Replace <<<#HOOPUSER#>>> with the Unix user that will
+  start the Hoop server.
+
+* Restart Hadoop
+
+  You need to restart Hadoop for the proxyuser configuration ot become
+  active.
+
+* Start/Stop Hoop
+
+  To start/stop Hoop use Hoop's bin/hoop.sh script. For example:
+
++---+
+hoop-${project.version} $ bin/hoop.sh start
++---+
+
+  NOTE: Invoking the script without any parameters list all possible
+  parameters (start, stop, run, etc.). The <<<hoop.sh>>> script is a wrapper
+  for Tomcat's <<<catalina.sh>>> script that sets the environment variables
+  and Java System properties required to run Hoop.
+
+* Test Hoop is working
+
++---+
+~ $ curl -i "http://<HOOPHOSTNAME>:14000?user.name=babu&op=homedir"
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"homeDir":"http:\/\/<HOOP_HOST>:14000\/user\/babu"}
++---+
+
+* Embedded Tomcat Configuration
+
+  To configure the embedded Tomcat go to the <<<tomcat/conf>>>.
+
+  Hoop preconfigures the HTTP and Admin ports in Tomcat's <<<server.xml>>> to
+  14000 and 14001.
+
+  Tomcat logs are also preconfigured to go to Hoop's <<<logs/>>> directory.
+
+  The following environment variables (which can be set in Hoop's
+  <<<conf/hoop-env.sh>>> script) can be used to alter those values:
+
+  * HOOP_HTTP_PORT
+
+  * HOOP_ADMIN_PORT
+
+  * HOOP_LOG
+
+* Hoop Configuration
+
+  Hoop supports the following {{{hoop-default.html}configuration properties}}
+  in the Hoop's <<<conf/hoop-site.xml>>> configuration file.
+
+  \[ {{{index.html}Go Back}} \]

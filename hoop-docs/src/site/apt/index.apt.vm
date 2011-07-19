@@ -1,0 +1,128 @@
+~~ Licensed to Cloudera, Inc. under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. Cloudera, Inc. licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+  ---
+  Hoop, Hadoop HDFS over HTTP - Documentation Sets ${project.version}
+  ---
+  Alejandro Abdelnur
+  ---
+  ${maven.build.timestamp}
+
+Hoop, Hadoop HDFS over HTTP - Documentation Sets ${project.version}
+
+  Enough reading, take me to the {{{ServerSetup.html}Hoop setup instructions}}.
+
+  Hoop is a server that provides a REST HTTP gateway supporting all HDFS
+  File System operations (read and write).
+
+  Hoop can be used to transfer data between clusters running different
+  versions of Hadoop (overcoming RPC versioning issues), for example using
+  Hadoop DistCP.
+
+  Hoop can be used to access data in HDFS on a cluster behind of a firewall
+  (the Hoop server acts as a gateway and is the only system that is allowed
+  to cross the firewall into the cluster).
+
+  Hoop can be used to access data in HDFS using HTTP utilities (such as curl
+  and wget) and HTTP libraries Perl from other languages than Java.
+
+  Hoop also provides a Hadoop HDFS FileSystem implementation to allow that
+  enables access to HDFS over HTTP using the <<<hadoop>>> command line tool
+  as well as the Hadoop FileSystem Java API.
+
+  Hoop file URIs are identical to HDFS URIs (except for the
+  <<<SCHEMA://HOST:PORT>>>).
+
+  Hoop has built-in security supporting Hadoop pseudo authentication,
+  HTTP SPNEGO Kerberos and pluggable authentication mechanims (authentication
+  is enforced using {{{http://github.com/cloudera/alfredo}Alfredo}}. It also
+  provides Hadoop proxy user support.
+
+* License
+
+  Hoop is distributed under
+  {{{http://www.apache.org/licenses/}Apache License 2.0}}.
+
+* Source Repository
+
+  {{http://github.com/cloudera/hoop}}
+
+* How Does Hoop Works?
+
+  Hoop is a separate service from Hadoop NameNode.
+
+  Hoop itself is Java web-application and it runs using a preconfigured Tomcat
+  bundled with Hoop binary distribution.
+
+  Hoop HTTP web-service API calls are HTTP REST calls that map to a HDFS file
+  system operation. For example, using the <<<curl>>> Unix command:
+
+  * <<<$ curl http://myhoop:14000/user/foo/README.txt>>> returns the
+  contents of the HDFS <<</user/foo/README.txt>>> file.
+
+  * <<<$ curl http://myhoop:14000/user/foo?op=list>>> returns the
+  contents of the HDFS <<</user/foo>>> directory in JSON format.
+
+  * <<<$ curl -X POST http://myhoop:14000/user/foo/bar?op=mkdirs>>>
+  creates the HDFS <<</user/foo.bar>>> directory.
+
+* How Hoop and Hadoop HDFS Proxy differ?
+
+  Hoop was inspired by Hadoop HDFS proxy.
+
+  Hoop can be seening as a full rewrite of Hadoop HDFS proxy.
+
+  Hadoop HDFS proxy provides a subset of file system operations (read only),
+  Hoop provides support for all file system operations.
+
+  Hoop uses a clean HTTP REST API making its use with HTTP tools more
+  intuitive.
+
+  Hoop supports Hadoop pseudo authentication, Kerberos SPENGOS authentication
+  and Hadoop proxy users. Hadoop HDFS proxy does not.
+
+  Hadoop HDFS proxy has not been mantained and it may be removed from Hadoop
+  code.
+
+* User and Developer Documentation
+
+  * {{{ServerSetup.html}Hoop Server Setup}}
+
+  * {{{ClientSetup.html}Hoop Client Setup}}
+
+  * {{{HttpRestApi.html}HTTP REST API}}
+
+  * {{{client/apidocs/index.html}Hoop Client JavaDocs}}
+
+  * {{{server/apidocs/index.html}Hoop Server JavaDocs}}
+
+  * {{{client/dependencies.html}Hoop Client Dependencies}}
+
+  * {{{server/dependencies.html}Hoop Server Dependencies}}
+
+  * {{{./CHANGES.txt}Changes}}
+
+  * {{{BuildingIt.html}Building It}}
+
+* Current Limitations
+
+  The <<<FSDataInputStream>>>s returned by the <<<HoopFileSystem>>>
+  client implementation do not support the methods of the
+  <<<Seekable>>> and <<<PositionedReadable>>> interfaces.
+
+  The <<<skip()>>> method of <<<InputStream>>>s returned by the
+  <<<HoopFileSystem>>> client skips bytes on the client side,
+  the underlaying inputstream is fully read.

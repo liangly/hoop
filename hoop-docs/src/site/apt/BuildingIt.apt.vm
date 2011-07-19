@@ -1,0 +1,203 @@
+~~ Licensed to Cloudera, Inc. under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. Cloudera, Inc. licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+  ---
+  Hoop, Hadoop HDFS over HTTP  ${project.version} - Building It
+  ---
+  Alejandro Abdelnur
+  ---
+  ${maven.build.timestamp}
+
+Hoop, Hadoop HDFS over HTTP  ${project.version} - Building It
+
+  \[ {{{index.html}Go Back}} \]
+
+* Requirements
+
+    * Java 6+
+
+    * Maven 3+
+
+* Source location
+
+    * GitHub URL: {{https://github.com/cloudera/hoop}}
+
+    * Git URL: <<<git://github.com/cloudera/hoop.git>>>
+
+* Building and Testing
+
+  Use Maven goals: clean, test, compile, package, site, install,
+  assembly:single
+
+* Changing the Version of Hadoop used to Build and Test Hoop
+
+  Hoop by defaul builds with Hadoop <<cdh3u0>>. It has been tested with both
+  <<cdh3u0>> and <<cdh3u1>>.
+
+  To change the version of Hadoop used to build Hoop edit the
+  <<<hoop-project/pom.xml>>> file setting the <<<hadoop.version>>> property
+  to the desired Hadoop version.
+
+  <<IMPORTANT:>> Hoop uses the Hadoop <<<UserGroupInformation>>> class and
+  Hadoop proxy user capabilities introduced with Hadoop security. Hoop does
+  not work with earlier versions of Hadoop.
+
+* Testing Configuration
+
+  All the properties in the <<<test.properties>>> file in the source root
+  become Java System Properties during the tests.
+
+  The following properties control how tests are run (shown with default
+  values):
+
+    * <<<test.hadoop.minicluster=true>>>
+
+    * <<<test.hadoop.user.u1=g1,supergroup>>>
+
+    * <<<test.hadoop.user.u2=g2,supergroup>>>
+
+    * <<<test.hadoop.proxyuser=$\{user.name\}>>>
+
+  In the above properties the <<<u1>>> and <<<u2>>> are the users used from
+  the tests. <<<g1, g2 & supergroup>>> are the groups they belong to.
+
+  The Unix user running the tests is by default the proxy user for the 'doAs'
+  tests.
+
+  If minicluster is set to <<<false>>>, the the <<<fs.default.name>>> property
+  must be set to the RPC URL of the Namenode used for the testcases.
+
+* Building a binary distribution
+
+  From Hoop source root directory run:
+
++---+
+$ mvn clean package site assembly:single
++---+
+
+  The TARBALL distribution will be at
+  <<<hoop-distro/target/hoop-${project.version}.tar.gz>>>.
+
+* Running Clover
+
++---+
+$ mvn clean install clover2:instrument clover2:aggregate clover2:clover
++---+
+
+  <<<install>>> must be run, otherwise clover does not find dependent modules JARs.
+
+  The Clover license location can be specified with the following option (default
+  value shown) when invoking Maven:
+
++---+
+$ mvn clean install clover2:instrument clover2:aggregate clover2:clover \
+  -DcloverLicenseLocation=${user.home}/.clover.license
++---+
+
+* Doing a Release
+
+** Checklist
+
+    * README file must be updated to list the version being released as an
+    available version
+
+    * Update the <<<hoop-docs/src/site/docs.html>>> page to include a link
+    to the docs of the version being released
+
+    * Push the local commits to the GitHub repository
+
+** Update the Version, Tag the Repository, Deploy the POM/JARs to the Maven Repository
+
+    Use the <<<mvn release:prepare>>> and <<<mvn release:perform>>> commands.
+
+    The following instructions will:
+
+      * Update the versions in POMs to the release version
+
+      * Tag the commit with the release version
+
+      * Update the versions in the POMs to the next development version
+
+      * Deploy the POM/JARs to the Maven Repository
+
+    For the tag name use exactly the release number (i.e. <<<1.0.0>>>).
+
+    <<IMPORTANT:>> Write permission to the GitHub repository and to the CDH
+    release Maven repository are required.
+
+** Publish the Documentation
+
+   Checkout the release tag and build a binary distribution.
+
++---+
+$ mvn clean package site assembly:single -DskipTests
++---+
+
+   The generated documentation is available at
+   <<<hoop-distribution/target/hoop-${project.version}/hoop-${project.version}/docs>>>.
+
+   Copy documentation directory to a temporary location.
+
++---+
+$ cp -r hoop-docs/target/hoop-docs/docs /tmp/hoopdocs/
++---+
+
+   Checkout the <<<gh-pages>>> branch and clean working directory.
+
++---+
+$ git checkout gh-pages
+$ git clean -d -f
++---+
+
+   Remove <<<docs/latest/>>> directory and commit the removal.
+
++---+
+$ rm -rf docs/latest
+$ git add -u
+$ git commit -m "cleaning latest"
+[gh-pages 5243411] cleaning latest
+ 84 files changed, 0 insertions(+), 12013 deletions(-)
+ delete mode 100644 docs/latest/BuildingIt.html
+ ...
+ delete mode 100644 docs/latest/images/newwindow.png
+ delete mode 100644 docs/latest/index.html
++---+
+
+   Copy the new documentation set from the temporary location, add the new documentation files to Git
+   and commit them.
+
++---+
+$ cp -r /tmp/hoopdocs/* docs/
+
+$ git add index.html docs/*
+
+$ git commit -m "docs ${project.version}"
+[gh-pages 55193ef] docs ${project.version}
+ 170 files changed, 24066 insertions(+), 0 deletions(-)
+ create mode 100644 docs/${project.version}/BuildingIt.html
+ ...
+ create mode 100644 docs/latest/index.html
++---+
+
+   Check the documentation locally by, then push the documentation to GitHub.
+
++---+
+$ git push origin gh-pages:gh-pages
++---+
+
+   Check the site looks properly: {{{http://cloudera.github.com/hoop}Hoop GitHub site}}.
+
+  \[ {{{index.html}Go Back}} \]

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+   Licensed to Cloudera, Inc. under one or more contributor license
+   agreements.  See the NOTICE file distributed with this work for
+   additional information regarding copyright ownership.  Cloudera,
+   Inc. licenses this file to you under the Apache License, Version
+   2.0 (the "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+  Copyright (c) 2010 Cloudera, inc.
+-->
+<configuration>
+
+  <!-- Hoop Server -->
+
+  <property>
+    <name>hoop.base.url</name>
+    <value>http://${hoop.http.hostname}:${hoop.http.port}</value>
+    <description>
+      The SCHEMA://HOST:PORT of the Hoop server.
+
+      It is sythetized using the 2 system properties 'hoop.http.hostname' and
+      'hoop.http.port' that are set by the 'hoop.sh' script at start time. If
+      using virtual servers or HTTPS this property must be set manually.
+
+      This property is used to create the file status information of files
+      which contains a full URI to the file.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.buffer.size</name>
+    <value>4096</value>
+    <description>
+      The buffer size used by a read/write request when streaming data from/to
+      HDFS.
+    </description>
+  </property>
+
+  <!-- Hoop Services -->
+
+  <property>
+    <name>hoop.services</name>
+    <value>
+      com.cloudera.lib.service.instrumentation.InstrumentationService,
+      com.cloudera.lib.service.scheduler.SchedulerService,
+      com.cloudera.lib.service.security.GroupsService,
+      com.cloudera.lib.service.security.ProxyUserService,
+      com.cloudera.lib.service.hadoop.HadoopService
+    </value>
+    <description>
+      Services used by the Hoop server.
+    </description>
+  </property>
+
+  <!-- Kerberos Configuration -->
+
+  <property>
+    <name>kerberos.realm</name>
+    <value>LOCALHOST</value>
+    <description>
+      Kerberos realm, used only if Kerberos authentication is used between
+      the clients and Hoop or between Hoop and HDFS.
+
+      This property is only used to resolve other properties within this
+      configuration file.
+    </description>
+  </property>
+
+  <!-- Hoop Security Configuration -->
+
+  <property>
+    <name>hoop.hostname</name>
+    <value>${hoop.http.hostname}</value>
+    <description>
+      Property used to synthetize the HTTP Kerberos principal used by Hoop.
+
+      This property is only used to resolve other properties within this
+      configuration file.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.authentication.type</name>
+    <value>simple</value>
+    <description>
+      Defines the authentication mechanism used by Hoop for its HTTP clients.
+
+      Valid values are 'simple' and 'kerberos'.
+
+      If using 'simple' HTTP clients must specify the username with the
+      'user.name' query string parameter.
+
+      If using 'kerberos' HTTP clients must use HTTP SPNEGO.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.authentication.kerberos.principal</name>
+    <value>HTTP/${hoop.hostname}@${kerberos.realm}</value>
+    <description>
+      The HTTP Kerberos principal used by Hoop in the HTTP endpoint.
+
+      The HTTP Kerberos principal MUST start with 'HTTP/' per Kerberos
+      HTTP SPENGO specification.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.authentication.kerberos.keytab</name>
+    <value>${user.home}/hoop.keytab</value>
+    <description>
+      The Kerberos keytab file with the credentials for the
+      HTTP Kerberos principal used by Hoop in the HTTP endpoint.
+    </description>
+  </property>
+
+  <!-- Hoop proxy user Configuration -->
+
+  <property>
+    <name>hoop.proxyuser.#USER#.hosts</name>
+    <value>*</value>
+    <description>
+      List of hosts the '#USER#' user is allowed to perform 'doAs'
+      operations.
+
+      The '#USER#' must be replaced with the username o the user who is
+      allowed to perform 'doAs' operations.
+
+      The value can be the '*' wildcard or a list of hostnames.
+
+      For multiple users copy this property and replace the user name
+      in the property name.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.proxyuser.#USER#.groups</name>
+    <value>*</value>
+    <description>
+      List of groups the '#USER#' user is allowed to impersonate users
+      from to perform 'doAs'  operations.
+
+      The '#USER#' must be replaced with the username o the user who is
+      allowed to perform 'doAs' operations.
+
+      The value can be the '*' wildcard or a list of groups.
+
+      For multiple users copy this property and replace the user name
+      in the property name.
+    </description>
+  </property>
+
+  <!-- Hadoop Namenode Configuration -->
+
+  <property>
+    <name>namenode.hostname</name>
+    <value>localhost</value>
+    <description>
+      The HDFS Namenode host the Hoop server connects to perform file
+      system operations.
+
+      This property is only used to resolve other properties within this
+      configuration file.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.hadoop.conf:fs.default.name</name>
+    <value>hdfs://${namenode.hostname}:8020</value>
+    <description>
+      The HDFS Namenode URI the Hoop server connects to perform file
+      system operations.
+    </description>
+  </property>
+
+  <!-- Hadoop Namenode Security Configuration -->
+
+  <property>
+    <name>hoop.hadoop.authentication.type</name>
+    <value>simple</value>
+    <description>
+      Defines the authentication mechanism used by Hoop to connect to
+      the HDFS Namenode.
+
+      Valid values are 'simple' and 'kerberos'.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.hadoop.authentication.kerberos.keytab</name>
+    <value>${user.home}/hoop.keytab</value>
+    <description>
+      The Kerberos keytab file with the credentials for the
+      Kerberos principal used by Hoop to connect to the HDFS Namenode.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.hadoop.authentication.kerberos.principal</name>
+    <value>${user.name}/${hoop.hostname}@${kerberos.realm}</value>
+    <description>
+      The Kerberos principal used by Hoop to connect to the HDFS Namenode.
+    </description>
+  </property>
+
+  <property>
+    <name>hoop.hadoop.conf:dfs.namenode.kerberos.principal</name>
+    <value>hdfs/${namenode.hostname}@${kerberos.realm}</value>
+    <description>
+      The HDFS Namenode Kerberos principal.
+    </description>
+  </property>
+
+</configuration>

@@ -1,0 +1,391 @@
+~~ Licensed to Cloudera, Inc. under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. Cloudera, Inc. licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+  ---
+  Hoop, Hadoop HDFS over HTTP ${project.version} - HTTP REST API
+  ---
+  Alejandro Abdelnur
+  ---
+  ${maven.build.timestamp}
+
+Hoop, Hadoop HDFS over HTTP ${project.version} - HTTP REST API
+
+  \[ {{{index.html}Go Back}} \]
+
+* File System Operations
+
+  The HTTP REST API is fully demonstrated below using the Unix <<<curl>>>
+  command.
+
+  HOOP HTTP status codes follow HTTP guidelines.
+
+  HOOP payload responses are in JSON format.
+
+  For optional parameters, the default values are between '*', for example
+  'overwrite=*true*|false'.
+
+** Security
+
+*** Hadoop Pseudo Authentication
+
+  If using Hadoop pseudo authentication the user must be specified with the
+  <<<user.name=\<USERNAME\>>>> query string parameter and the
+  <<<-b ~/.hoopauth -c ~/.hoopauth>>> options.
+
+  The <<<-b ~/.hoopauth -c ~/.hoopauth>>> options must be used with every
+  <<<curl>>> invocation.
+
+*** Hadoop Kerberos SPNEGO Authentication
+
+  If using Kerberos SPNEGO authentication the  <<<curl>>> version must support
+  GSS. Run <<<curl -V>>> to see if the installed version of <<<curl>>> supports
+  GSS.
+
+  The <<<--negotiate -u foo -b ~/.hoopauth -c ~/.hoopauth>>> options
+  must be used with every <<<curl>>> invocation.
+
+  <<For example:>>
+
+  Login to the KDC using <<<kinit>>>, then use <<<curl>>> to access a file via
+  the Hoop Server:
+
++---+
+$ kinit
+Please enter the password for tucu@LOCALHOST:
+$ curl --negotiate -u foo -b ~/.hoopauth -c ~/.hoopauth http://<HOOP_HOST>:14000/user/foo/hello.txt
+Enter host password for user 'foo':
+
+Hello Hoop!
++---+
+
+  * The <<<--negotiate>>> option enables SPNEGO in curl.
+
+  * The <<<-u>>> foo option is required but the user ignored (the principal
+    that has been kinit-ed is used).
+
+  * The <<<-b>>> and <<<-c>>> are use to store and send HTTP Cookies (this
+    prevents subsequent calls to do the SPNEGO authentication sequence).
+
+** Read File
+
+  HTTP Request:
+
++---+
+$ curl -X GET -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>[?<OPTION>[&<OPTION>]*]"
++---+
+
+  OPTIONS:
+
+  * offset=*-1*|\<LONG\> ('-1' means the whole file)
+
+  * len=*-1*|\<LONG\> ('-1' means from the beginning of the file)
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Location: http://<HOOP_HOST>:14000/PATH
+Content-Type: application/octet-stream
+Transfer-Encoding: chunked
+
+<FILE CONTENTS>
++---+
+
+** Write File
+
+  HTTP Request:
+
++---+
+$ curl -X POST -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=create[&<OPTION>]*" \
+--data-binary @data.txt  --header "content-type: application/octet-stream"
++---+
+
+  OPTIONS:
+
+  * overwrite=*true*|false
+
+  * replication=*-1*|\<SHORT\>
+
+  * blocksize=*-1*|\<LONG\>
+
+  * permission=*default*|\<-rwxrwxrw\>
+
+  The content-type header must be specified othewise <<<curl>>> will use
+  <<<application/x-www-form-urlencoded>>> and the servlet-container will
+  attempt parsing the inputstream as a form POST.
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 201 Created
+Location: http://<HOOP_HOST>:14000/PATH
+Content-Type: application/json
+Content-Length: 0
+
++---+
+
+** Append File
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=append" \
+--data-binary @data.txt --header "content-type: application/octet-stream"
++---+
+
+  The content-type header must be specified othewise <<<curl>>> will use
+  <<<application/x-www-form-urlencoded>>> and the servlet-container will
+  attempt parsing the inputstream as a form POST.
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Location: http://<HOOP_HOST>:14000/PATH
+Content-Type: application/json
+Content-Length: 0
+
++---+
+
+** Rename File/Directory
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<OLDPATH>?op=rename&to=<NEWPATH>"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"rename":true}
++---+
+
+** Delete File/Directory
+
+  HTTP Request:
+
++---+
+$ curl -X DELETE -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=delete[&recursive=*true*|false]"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"delete":true}
++---+
+
+** List Directory
+
+  HTTP Request:
+
++---+
+$curl -X GET -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=list[&filter=<FILTER>]"
++---+
+
+  If specifying a filter use Hadoop's GlobFilter syntax.
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+[
+  {
+    "path" : "http:\/\/<HOOP_HOST>:14000\/<PATH>\/foo.txt"
+    "isDir" : false,
+    "len" : 966,
+    "owner" : "babu",
+    "group" : "supergroup",
+    "permission" : "-rw-r--r--",
+    "accessTime" : 1310671662423,
+    "modificationTime" : 1310671662423,
+    "blockSize" : 67108864,
+    "replication" : 3
+  }
+]
++---+
+
+** Make Directory
+
+  HTTP Request:
+
++---+
+$ curl -X POST -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=mkdirs[&permission=*default*|<-rwxrwxrw>]"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"mkdirs":true}
++---+
+
+** File Status
+
+  HTTP Request:
+
++---+
+$ curl -X GET -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=status"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{
+  "path" : "http:\/\/<HOOP_HOST>:14000\/<PATH>"
+  "isDir" : false,
+  "len" : 966,
+  "owner" : "babu",
+  "group" : "supergroup",
+  "permission" : "-rw-r--r--",
+  "accessTime" : 1310671662423,
+  "modificationTime" : 1310671662423,
+  "blockSize" : 67108864,
+  "replication" : 3
+}
++---+
+
+** Home Directory
+
+  HTTP Request:
+
++---+
+$ curl -X GET -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/?op=homedir"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"homeDir":"http:\/\/<HOOP_HOST>:14000\/user\/babu"}
++---+
+
+** Set Owner
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<OLDPATH>?op=setowner&owner=<OWNER>&group=<GROUP>"
++---+
+
+  If 'owner' or 'group' are not specified, the current value is preserved.
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 0
+
++---+
+
+** Set Permission
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=setpermission&permission=*default*|<-rwxrwxrw>"
++---+
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 0
+
++---+
+
+** Set Times
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=settimes&mtime=<LONG>&atime=<LONG>"
++---+
+
+  If 'mtime' or 'atime' are not specified, the current value is preserved.
+
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 0
+
++---+
+
+** Set Replication
+
+  HTTP Request:
+
++---+
+$ curl -X PUT -b ~/.hoopauth -c ~/.hoopauth "http://<HOOP_HOST>:14000/<PATH>?op=setreplication&replication=<SHORT>"
++---+
+
+  If 'replication' is not set the default value is used.
+  
+  Sucessful HTTP Response:
+
++---+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{"setReplication":true}
++---+
+
+** File System Command Failures
+
+  A failed Hoop file system command produces a detailed response in JSON
+  besides the HTTP error code, for example:
+
++---+
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: close
+
+{
+  "statusCode":500,
+  "reason":"Internal Server Error",
+  "message":"H03: FileSystemExecutor error, ...: Non-super user cannot change owner.",
+  "exception":"HadoopException"
+}
++---+
+
+  \[ {{{index.html}Go Back}} \]

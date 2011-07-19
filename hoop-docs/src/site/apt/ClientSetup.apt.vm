@@ -1,0 +1,93 @@
+~~ Licensed to Cloudera, Inc. under one
+~~ or more contributor license agreements. See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership. Cloudera, Inc. licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License. You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+  ---
+  Hoop, Hadoop HDFS over HTTP ${project.version} - Client Setup
+  ---
+  Alejandro Abdelnur
+  ---
+  ${maven.build.timestamp}
+
+Hoop, Hadoop HDFS over HTTP ${project.version} - Client Setup
+
+  \[ {{{index.html}Go Back}} \]
+
+* Client Configuration
+
+  Add Hoop Client JARs to the CLASSPATH.
+
+  The Hoop Client JARs are available in the Hoop distro <<client-lib>>> directory.
+
+  They are also available in Cloudera's Maven repository:
+
+    * Repo URL: <<<https://repository.cloudera.com/content/repositories/releases>>>
+
+    * Group Id: com.cloudera.hoop
+
+    * Artifact Id: hoop-client
+
+    * Version: ${project.version}
+
+    * Type: jar
+
++---+
+  ...
+  <dependency>
+      <groupId>com.cloudera.hoop</groupId>
+      <artifactId>hoop-client</artifactId>
+      <version>${project.version}</version>
+  </dependency>
+  ...
++---+
+
+  Create a File System object that connects to the Hoop Server:
+
++---+
+  ...
+  Configuration conf = new Configuration();
+  conf.set("fs.http.impl", HoopFileSystem.class.getName());
+  FileSystem fs = FileSystem.get(new URI("http://myhoophost:14000"), conf);
+  ...
++---+
+
+  The returned <<<FileSystem>>> object connects to the Hoop server.
+
+  All file system operations are supported.
+
+* Using Hadoop <<<hadoop>>> to access HDFS via Hoop
+
+  Set the <<<HADOOP_CLASSPATH>>> environment variable with all the JARs from
+  Hoop's <<</client-lib>>> directory. For example:
+
++---+
+$ cd <HOOP_HOME>
+$ export HADOOP_CLASSPATH="`pwd`/client-lib/alfredo-0.1.5.jar:`pwd`/client-lib/hoop-client-0.1.0-SNAPSHOT.jar:`pwd`/client-lib/json-simple-1.1.jar"
++---+
+
+  NOTE: The <<<commons-codec>>> JAR file is part of Hadoop's CLASSPATH, thus no need to include it.
+
+  Invoke <<<hadoop fs>>> setting the Namenode URI and registering Hoop's
+  file system implementation. For example:
+
++---+
+$ hadoop fs -Dfs.default.name=http://<HOOP_HOSTNAME>:14000 -Dfs.http.impl=com.cloudera.hoop.client.fs.HoopFileSystem -lsr
+-rw-rw-rw-   1 babu staff             966 1969-12-31 16:00 /user/babu/foofoo.txt
+drwxr-xr-x   - babu supergroup          0 2011-07-14 12:43 /user/babu/x
++---+
+
+  NOTE: For a more permanent setup, add the 2 properties to your local <<<hdfs-site.xml>>>.
+
+  \[ {{{index.html}Go Back}} \]

@@ -1,0 +1,14 @@
+
+Copyright (c) 2011, Cloudera, Inc. All Rights Reserved.
+
+=======================================================================
+NOTICE file for use with, and corresponding to Section 4 of,
+the Apache License, Version 2.0, in this case for Hoop
+=======================================================================
+
+This product includes software developed by Cloudera, Inc.
+(http://www.cloudera.com/).
+
+Detailed License information for all components can be found in Hoop
+documentation in the dependencies pages.
+
